@@ -36,15 +36,3 @@ class Note(models.Model):
 
     def __unicode__(self):
         return 'Note: %s' % self.text
-
-
-class Contact(models.Model):
-    """
-    A textual note that may have multiple tags attached.
-    """
-    name = models.TextField()
-    slug = models.SlugField()
-    tags = GenericRelation(Tag)
-
-    def __unicode__(self):
-        return 'Contact: %s' % self.name
