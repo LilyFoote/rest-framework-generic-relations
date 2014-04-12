@@ -56,8 +56,6 @@ class GenericRelatedField(serializers.WritableField):
         if serializer is None:
             raise ImproperlyConfigured('Could not determine a valid serializer for value "%r"' % value)
         serializer.initialize(self.parent, self.source)
-        import pdb
-        pdb.set_trace()
         return serializer.from_native(value)
 
     def determine_deserializer_for_data(self, value):
