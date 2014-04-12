@@ -1,13 +1,11 @@
 from __future__ import unicode_literals
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.generic import GenericRelation, GenericForeignKey
-from django.db import models
 from django.test import TestCase, RequestFactory
 from rest_framework import serializers
 from rest_framework.compat import patterns, url
 from rest_framework.reverse import reverse
 
 from generic_relations.relations import GenericRelationOption, GenericRelatedField
+from generic_relations.tests.models import Bookmark, Contact, Note, Tag
 
 
 factory = RequestFactory()
@@ -22,53 +20,6 @@ urlpatterns = patterns('',
     url(r'^tag/(?P<pk>[0-9]+)/$', dummy_view, name='tag-detail'),
     url(r'^contact/(?P<my_own_slug>[-\w]+)/$', dummy_view, name='contact-detail'),
 )
-
-
-class Tag(models.Model):
-    """
-    Tags have a descriptive slug, and are attached to an arbitrary object.
-    """
-    tag = models.SlugField()
-    content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
-    tagged_item = GenericForeignKey('content_type', 'object_id')
-
-    def __unicode__(self):
-        return self.tag
-
-
-class Bookmark(models.Model):
-    """
-    A URL bookmark that may have multiple tags attached.
-    """
-    url = models.URLField()
-    tags = GenericRelation(Tag)
-
-    def __unicode__(self):
-        return 'Bookmark: %s' % self.url
-
-
-class Note(models.Model):
-    """
-    A textual note that may have multiple tags attached.
-    """
-    text = models.TextField()
-    tags = GenericRelation(Tag)
-
-    def __unicode__(self):
-        return 'Note: %s' % self.text
-
-
-class Contact(models.Model):
-    """
-    A textual note that may have multiple tags attached.
-    """
-    name = models.TextField()
-    slug = models.SlugField()
-    tags = GenericRelation(Tag)
-
-    def __unicode__(self):
-        return 'Contact: %s' % self.name
 
 
 class TestGenericRelationOptions(TestCase):
@@ -129,7 +80,7 @@ class TestGenericRelationOptions(TestCase):
 
 class TestGenericRelatedFieldToNative(TestCase):
 
-    urls = 'rest_framework.tests.relations_generic'
+    urls = 'generic_relations.tests.test_relations'
 
     def setUp(self):
         self.bookmark = Bookmark.objects.create(url='https://www.djangoproject.com/')
@@ -295,7 +246,7 @@ class TestGenericRelatedFieldToNative(TestCase):
 
 class TestGenericRelatedFieldFromNative(TestCase):
 
-    urls = 'rest_framework.tests.relations_generic'
+    urls = 'generic_relations.tests.test_relations'
 
     def setUp(self):
         self.bookmark = Bookmark.objects.create(url='https://www.djangoproject.com/')
