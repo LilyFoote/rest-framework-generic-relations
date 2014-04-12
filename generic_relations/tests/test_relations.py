@@ -3,11 +3,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.generic import GenericRelation, GenericForeignKey
 from django.db import models
 from django.test import TestCase, RequestFactory
-
 from rest_framework import serializers
 from rest_framework.compat import patterns, url
-from rest_framework.genericrelations import GenericRelationOption, GenericRelatedField
 from rest_framework.reverse import reverse
+
+from generic_relations.relations import GenericRelationOption, GenericRelatedField
+
 
 factory = RequestFactory()
 request = factory.get('/')  # Just to ensure we have a request in the serializer context
