@@ -1,4 +1,4 @@
-# Rest Framework Generic Relations
+# Rest Framework Generic Relations [![Build Status](https://travis-ci.org/Ian-Foote/rest-framework-generic-relations.svg?branch=pep8)](https://travis-ci.org/Ian-Foote/rest-framework-generic-relations)
 
 # API Reference
 
