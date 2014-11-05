@@ -3,13 +3,13 @@ python:
   - "2.7"
   - "3.3"
 env:
-  - DJANGO_VERSION=1.4
+  - DJANGO_VERSION=1.4.16
   - DJANGO_VERSION=1.5
   - DJANGO_VERSION=1.6
 matrix:
     exclude:
         - python: "3.3"
-          env: DJANGO_VERSION=1.4
+          env: DJANGO_VERSION=1.4.16
 install:
   - pip install -q Django==$DJANGO_VERSION
   - pip install -r test_requirements.txt
