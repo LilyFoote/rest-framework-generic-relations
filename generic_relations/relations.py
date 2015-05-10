@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django import forms
+from django.utils import six
 
-from rest_framework import six
 from rest_framework import serializers
 
 
