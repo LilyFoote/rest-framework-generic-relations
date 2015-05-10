@@ -2,7 +2,11 @@ from __future__ import unicode_literals
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.test import TestCase, RequestFactory
 from rest_framework import serializers
-from rest_framework.compat import url
+try:
+    from django.conf.urls import url
+except ImportError:
+    from django.conf.urls.defaults import url
+
 from rest_framework.reverse import reverse
 
 from generic_relations.relations import GenericRelatedField
@@ -71,18 +75,18 @@ class TestGenericRelatedFieldDeserialization(TestCase):
                 model = Tag
                 exclude = ('id', 'content_type', 'object_id', )
 
-        serializer = TagSerializer(Tag.objects.all(), many=True)
+        serializer = TagSerializer(Tag.objects.all(), many=True, context={'request': request})
         expected = [
             {
-                'tagged_item': '/bookmark/1/',
+                'tagged_item': 'http://testserver/bookmark/1/',
                 'tag': 'django',
             },
             {
-                'tagged_item': '/bookmark/1/',
+                'tagged_item': 'http://testserver/bookmark/1/',
                 'tag': 'python',
             },
             {
-                'tagged_item': '/note/1/',
+                'tagged_item': 'http://testserver/note/1/',
                 'tag': 'reminder'
             }
         ]
@@ -139,7 +143,7 @@ class TestGenericRelatedFieldDeserialization(TestCase):
                 model = Tag
                 exclude = ('id', 'content_type', 'object_id', )
 
-        serializer = TagSerializer(Tag.objects.all(), many=True)
+        serializer = TagSerializer(Tag.objects.all(), many=True, context={'request': request})
         expected = [
             {
                 'tagged_item': {
@@ -154,7 +158,7 @@ class TestGenericRelatedFieldDeserialization(TestCase):
                 'tag': 'python'
             },
             {
-                'tagged_item': '/note/1/',
+                'tagged_item': 'http://testserver/note/1/',
                 'tag': 'reminder'
             }
         ]
@@ -208,10 +212,10 @@ class TestGenericRelatedFieldSerialization(TestCase):
         serializer = TagSerializer(data={
             'tag': 'reminder',
             'tagged_item': reverse('note-detail', kwargs={'pk': self.note.pk})
-        })
+        }, context={'request': request})
         serializer.is_valid()
         expected = {
-            'tagged_item': '/note/1/',
+            'tagged_item': 'http://testserver/note/1/',
             'tag': 'reminder'
         }
         self.assertEqual(serializer.data, expected)
