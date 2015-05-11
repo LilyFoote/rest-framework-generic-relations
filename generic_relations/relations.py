@@ -23,13 +23,20 @@ class GenericRelatedField(serializers.WritableField):
 
     form_field_class = forms.URLField
 
-    def __init__(self, serializers, *args, **kwargs):
+    def __init__(self, serializers, determining_errors=None, *args, **kwargs):
         """
         Needs an extra parameter `serializers` which has to be a dict
         key: value being `Model`: serializer.
+
+        Supports a `determining_errors` parameter which is a list of
+        ValidationError messages which should, in
+        determine_serializer_for_data(), indicate that the respective
+        serializer is not a match for the value. Default `None` means that any
+        ValidationError indicates a mismatch.
         """
         super(GenericRelatedField, self).__init__(*args, **kwargs)
         self.serializers = serializers
+        self.determining_errors = determining_errors
         for model, serializer in six.iteritems(self.serializers):
             # We have to do it, because the serializer can't access a
             # explicit manager through the GenericForeignKey field on
@@ -83,8 +90,12 @@ class GenericRelatedField(serializers.WritableField):
                 serializer.from_native(value)
                 # Collects all serializers that can handle the input data.
                 serializers.append(serializer)
-            except:
-                pass
+            except ValidationError as e:
+                if self.determining_errors and e.message not in self.determining_errors:
+                    # allow validation error to bubble up
+                    serializers.append(serializer)
+                else:
+                    pass
         # If no serializer found, raise error.
         l = len(serializers)
         if l < 1:
