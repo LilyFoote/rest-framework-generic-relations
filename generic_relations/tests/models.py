@@ -16,6 +16,16 @@ class Tag(models.Model):
         return self.tag
 
 
+class Detachable(models.Model):
+    """
+    Model with an optional GenericForeignKey relation
+    """
+    name = models.CharField(max_length=50)
+    content_type = models.ForeignKey(ContentType, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    content_object = generic.GenericForeignKey('content_type', 'object_id')
+
+
 class Bookmark(models.Model):
     """
     A URL bookmark that may have multiple tags attached.
