@@ -59,7 +59,7 @@ class TestGenericRelatedFieldDeserialization(TestCase):
         Tag.objects.create(tagged_item=self.note, tag='reminder')
 
         Detachable.objects.create(content_object=self.note, name='attached')
-        Detachable.objects.create(content_object=None, name='detached')
+        Detachable.objects.create(name='detached')
 
     def test_relations_as_hyperlinks(self):
 
