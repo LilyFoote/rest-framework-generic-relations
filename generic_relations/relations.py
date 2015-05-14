@@ -42,14 +42,16 @@ class GenericRelatedField(serializers.WritableField):
         Delegates to the `to_native` method of the serializer registered
         under obj.__class__
         """
+        if not getattr(obj, field_name):
+            # a serializer can't be determined when the value is `None`
+            return None
         value = super(GenericRelatedField, self).field_to_native(
             obj, field_name)
-        if value:
-            serializer = self.determine_deserializer_for_data(value)
+        serializer = self.determine_deserializer_for_data(value)
 
-            # Necessary because of context, field resolving etc.
-            serializer.initialize(self.parent, field_name)
-            return serializer.to_native(value)
+        # Necessary because of context, field resolving etc.
+        serializer.initialize(self.parent, field_name)
+        return serializer.to_native(value)
 
     def to_native(self, value):
         # Override to prevent the simplifying process of value as present
