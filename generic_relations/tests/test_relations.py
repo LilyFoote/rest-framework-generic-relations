@@ -10,7 +10,7 @@ except ImportError:
 from rest_framework.reverse import reverse
 
 from generic_relations.relations import GenericRelatedField
-from generic_relations.tests.models import Bookmark, Note, Tag
+from generic_relations.tests.models import Bookmark, Detachable, Note, Tag
 
 
 factory = RequestFactory()
@@ -23,6 +23,7 @@ def dummy_view(request, pk):
 
 urlpatterns = [
     url(r'^bookmark/(?P<pk>[0-9]+)/$', dummy_view, name='bookmark-detail'),
+    url(r'^detachable/(?P<pk>[0-9]+)/$', dummy_view, name='detachable-detail'),
     url(r'^note/(?P<pk>[0-9]+)/$', dummy_view, name='note-detail'),
     url(r'^tag/(?P<pk>[0-9]+)/$', dummy_view, name='tag-detail'),
     url(
@@ -56,6 +57,9 @@ class TestGenericRelatedFieldDeserialization(TestCase):
         Tag.objects.create(tagged_item=self.bookmark, tag='python')
         self.note = Note.objects.create(text='Remember the milk')
         Tag.objects.create(tagged_item=self.note, tag='reminder')
+
+        Detachable.objects.create(content_object=self.note, name='attached')
+        Detachable.objects.create(name='detached')
 
     def test_relations_as_hyperlinks(self):
 
@@ -179,6 +183,36 @@ class TestGenericRelatedFieldDeserialization(TestCase):
         def call_data():
             return serializer.data
         self.assertRaises(ValidationError, call_data)
+
+    def test_relation_as_null(self):
+        class DetachableSerializer(serializers.ModelSerializer):
+            content_object = GenericRelatedField(
+                {
+                    Bookmark: serializers.HyperlinkedRelatedField(
+                        view_name='bookmark-detail'),
+                    Note: serializers.HyperlinkedRelatedField(
+                        view_name='note-detail'),
+                },
+                source='content_object',
+                read_only=True,
+            )
+
+            class Meta:
+                model = Detachable
+                exclude = ('id', 'content_type', 'object_id', )
+
+        serializer = DetachableSerializer(Detachable.objects.all(), many=True, context={'request': request})
+        expected = [
+            {
+                'content_object': 'http://testserver/note/1/',
+                'name': 'attached',
+            },
+            {
+                'content_object': None,
+                'name': 'detached',
+            }
+        ]
+        self.assertEqual(serializer.data, expected)
 
 
 class TestGenericRelatedFieldSerialization(TestCase):
@@ -317,3 +351,28 @@ class TestGenericRelatedFieldSerialization(TestCase):
         serializer.save()
         tag = Tag.objects.get(pk=3)
         self.assertEqual(tag.tagged_item, self.note)
+
+    def test_nullable_relation_serializer_save(self):
+        class DetachableSerializer(serializers.ModelSerializer):
+            content_object = GenericRelatedField(
+                {
+                    Bookmark: serializers.HyperlinkedRelatedField(
+                        view_name='bookmark-detail'),
+                    Note: serializers.HyperlinkedRelatedField(
+                        view_name='note-detail'),
+                },
+                source='content_object',
+                read_only=False,
+                required=False
+            )
+
+            class Meta:
+                model = Detachable
+                exclude = ('id', 'content_type', 'object_id', )
+
+        serializer = DetachableSerializer(data={'name': 'foo'})
+        serializer.is_valid()
+        serializer.save()
+        freeagent = Detachable.objects.get(pk=1)
+        self.assertEqual(freeagent.name, 'foo')
+        self.assertEqual(freeagent.content_object, None)
