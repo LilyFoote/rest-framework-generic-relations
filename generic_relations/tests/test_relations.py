@@ -370,9 +370,7 @@ class TestGenericRelatedFieldSerialization(TestCase):
                 model = Detachable
                 exclude = ('id', 'content_type', 'object_id', )
 
-        serializer = DetachableSerializer(data={
-            'name': 'foo'
-        })
+        serializer = DetachableSerializer(data={'name': 'foo'})
         serializer.is_valid()
         serializer.save()
         freeagent = Detachable.objects.get(pk=1)
