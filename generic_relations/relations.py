@@ -42,8 +42,8 @@ class GenericRelatedField(serializers.WritableField):
         Delegates to the `to_native` method of the serializer registered
         under obj.__class__
         """
-        if not (obj and getattr(obj, field_name)):
-            # a serializer can't be determined when the value or object is `None`
+        if not getattr(obj, field_name):
+            # a serializer can't be determined for a nonexistent value
             return None
         value = super(GenericRelatedField, self).field_to_native(
             obj, field_name)
