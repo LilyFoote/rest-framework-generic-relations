@@ -8,7 +8,7 @@ from rest_framework.compat import six
 from rest_framework import serializers
 
 
-class GenericRelatedField(serializers.WritableField):
+class GenericRelatedField(serializers.Field):
     """
     Represents a generic relation foreign key.
     It's actually more of a wrapper, that delegates the logic to registered
@@ -30,46 +30,27 @@ class GenericRelatedField(serializers.WritableField):
         """
         super(GenericRelatedField, self).__init__(*args, **kwargs)
         self.serializers = serializers
-        for model, serializer in six.iteritems(self.serializers):
-            # We have to do it, because the serializer can't access a
-            # explicit manager through the GenericForeignKey field on
-            # the model.
-            if hasattr(serializer, 'queryset') and serializer.queryset is None:
-                serializer.queryset = model._default_manager.all()
 
-    def field_to_native(self, obj, field_name):
-        """
-        Delegates to the `to_native` method of the serializer registered
-        under obj.__class__
-        """
-        if not getattr(obj, field_name):
-            # a serializer can't be determined for a nonexistent value
-            return None
-        value = super(GenericRelatedField, self).field_to_native(
-            obj, field_name)
-        serializer = self.determine_deserializer_for_data(value)
-
-        # Necessary because of context, field resolving etc.
-        serializer.initialize(self.parent, field_name)
-        return serializer.to_native(value)
-
-    def to_native(self, value):
-        # Override to prevent the simplifying process of value as present
-        # in `WritableField.to_native`.
-        return value
-
-    def from_native(self, value):
-        # Get the serializer responsible for input resolving
+    def to_internal_value(self, data):
         try:
-            serializer = self.determine_serializer_for_data(value)
+            serializer = self.determine_serializer_for_data(data)
         except ImproperlyConfigured as e:
             raise ValidationError(e)
-        serializer.initialize(self.parent, self.source)
-        return serializer.from_native(value)
+        # Necessary because of context, field resolving etc.
+        serializer.bind(self.field_name, self.parent)
+        return serializer.to_internal_value(data)
 
-    def determine_deserializer_for_data(self, value):
+    def to_representation(self, instance):
+        serializer = self.determine_deserializer_for_data(instance)
+        # clear source before binding, to avoid an AssertionError
+        serializer.source = None
+        # Necessary because of context, field resolving etc.
+        serializer.bind(self.field_name, self.parent)
+        return serializer.to_representation(instance)
+
+    def determine_deserializer_for_data(self, instance):
         try:
-            model = value.__class__
+            model = instance.__class__
             serializer = self.serializers[model]
         except KeyError:
             raise ValidationError(self.error_messages['no_model_match'])
@@ -83,7 +64,7 @@ class GenericRelatedField(serializers.WritableField):
         serializers = []
         for serializer in six.itervalues(self.serializers):
             try:
-                serializer.from_native(value)
+                serializer.to_internal_value(value)
                 # Collects all serializers that can handle the input data.
                 serializers.append(serializer)
             except:
