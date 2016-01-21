@@ -1,12 +1,11 @@
 from __future__ import unicode_literals
+
+from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.test import TestCase, RequestFactory
-from rest_framework import serializers
-try:
-    from django.conf.urls import url
-except ImportError:
-    from django.conf.urls.defaults import url
+from django.test.utils import override_settings
 
+from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from generic_relations.relations import GenericRelatedField
@@ -46,10 +45,8 @@ class NoteSerializer(serializers.ModelSerializer):
         exclude = ('id', )
 
 
+@override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')
 class TestGenericRelatedFieldDeserialization(TestCase):
-
-    urls = 'generic_relations.tests.test_relations'
-
     def setUp(self):
         self.bookmark = Bookmark.objects.create(
             url='https://www.djangoproject.com/')
@@ -216,9 +213,8 @@ class TestGenericRelatedFieldDeserialization(TestCase):
         self.assertEqual(serializer.data, expected)
 
 
+@override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')
 class TestGenericRelatedFieldSerialization(TestCase):
-
-    urls = 'generic_relations.tests.test_relations'
 
     def setUp(self):
         self.bookmark = Bookmark.objects.create(

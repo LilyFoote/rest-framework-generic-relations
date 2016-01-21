@@ -5,13 +5,8 @@ python:
   - "3.4"
   - "3.5"
 env:
-  - DJANGO_VERSION=1.7
   - DJANGO_VERSION=1.8
   - DJANGO_VERSION=1.9
-matrix:
-    exclude:
-        - python: "3.5"
-          env: DJANGO_VERSION=1.7
 install:
   - pip install -q Django==$DJANGO_VERSION
   - pip install -r test_requirements.txt
