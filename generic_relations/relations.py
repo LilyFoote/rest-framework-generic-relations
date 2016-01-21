@@ -1,14 +1,14 @@
 from __future__ import unicode_literals
 
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 
 from rest_framework.compat import six
-from rest_framework import serializers
+from rest_framework.serializers import Field, ValidationError
 
 
-class GenericRelatedField(serializers.WritableField):
+class GenericRelatedField(Field):
     """
     Represents a generic relation foreign key.
     It's actually more of a wrapper, that delegates the logic to registered
@@ -37,43 +37,20 @@ class GenericRelatedField(serializers.WritableField):
         super(GenericRelatedField, self).__init__(*args, **kwargs)
         self.serializers = serializers
         self.determining_errors = determining_errors
-        for model, serializer in six.iteritems(self.serializers):
-            # We have to do it, because the serializer can't access a
-            # explicit manager through the GenericForeignKey field on
-            # the model.
-            if hasattr(serializer, 'queryset') and serializer.queryset is None:
-                serializer.queryset = model._default_manager.all()
+        for serializer in self.serializers.values():
+            serializer.bind('', self)
 
-    def field_to_native(self, obj, field_name):
-        """
-        Delegates to the `to_native` method of the serializer registered
-        under obj.__class__
-        """
-        value = super(GenericRelatedField, self).field_to_native(
-            obj, field_name)
-        serializer = self.determine_deserializer_for_data(value)
+    def to_internal_value(self, data):
+        serializer = self.determine_serializer_for_data(data)
+        return serializer.to_internal_value(data)
 
-        # Necessary because of context, field resolving etc.
-        serializer.initialize(self.parent, field_name)
-        return serializer.to_native(value)
+    def to_representation(self, instance):
+        serializer = self.determine_deserializer_for_data(instance)
+        return serializer.to_representation(instance)
 
-    def to_native(self, value):
-        # Override to prevent the simplifying process of value as present
-        # in `WritableField.to_native`.
-        return value
-
-    def from_native(self, value):
-        # Get the serializer responsible for input resolving
+    def determine_deserializer_for_data(self, instance):
         try:
-            serializer = self.determine_serializer_for_data(value)
-        except ImproperlyConfigured as e:
-            raise ValidationError(e)
-        serializer.initialize(self.parent, self.source)
-        return serializer.from_native(value)
-
-    def determine_deserializer_for_data(self, value):
-        try:
-            model = value.__class__
+            model = instance.__class__
             serializer = self.serializers[model]
         except KeyError:
             raise ValidationError(self.error_messages['no_model_match'])
@@ -81,13 +58,13 @@ class GenericRelatedField(serializers.WritableField):
 
     def determine_serializer_for_data(self, value):
         # While one could easily execute the "try" block within
-        # from_native and reduce operations, I consider the concept of
+        # to_internal_value and reduce operations, I consider the concept of
         # serializing is already very naive and vague, that's why I'd
         # go for stringency with the deserialization process here.
         serializers = []
         for serializer in six.itervalues(self.serializers):
             try:
-                serializer.from_native(value)
+                serializer.to_internal_value(value)
                 # Collects all serializers that can handle the input data.
                 serializers.append(serializer)
             except ValidationError as e:
@@ -99,9 +76,9 @@ class GenericRelatedField(serializers.WritableField):
         # If no serializer found, raise error.
         l = len(serializers)
         if l < 1:
-            raise ImproperlyConfigured(
+            raise ValidationError(
                 'Could not determine a valid serializer for value %r.' % value)
         elif l > 1:
-            raise ImproperlyConfigured(
+            raise ValidationError(
                 'There were multiple serializers found for value %r.' % value)
         return serializers[0]

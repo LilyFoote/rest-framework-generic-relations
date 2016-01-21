@@ -4,10 +4,10 @@
 from setuptools import setup, find_packages
 
 
-version = '0.1.0'
+version = '1.0.0'
 
 install_requires = [
-    'djangorestframework>=2.3.14,<3',
+    'djangorestframework>=3.0.0,<4',
 ]
 
 
