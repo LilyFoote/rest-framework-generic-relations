@@ -1,12 +1,11 @@
 from __future__ import unicode_literals
+
+from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.test import TestCase, RequestFactory
-from rest_framework import serializers
-try:
-    from django.conf.urls import url
-except ImportError:
-    from django.conf.urls.defaults import url
+from django.test.utils import override_settings
 
+from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from generic_relations.relations import GenericRelatedField
@@ -46,10 +45,8 @@ class NoteSerializer(serializers.ModelSerializer):
         exclude = ('id', )
 
 
+@override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')
 class TestGenericRelatedFieldDeserialization(TestCase):
-
-    urls = 'generic_relations.tests.test_relations'
-
     def setUp(self):
         self.bookmark = Bookmark.objects.create(
             url='https://www.djangoproject.com/')
@@ -67,11 +64,12 @@ class TestGenericRelatedFieldDeserialization(TestCase):
             tagged_item = GenericRelatedField(
                 {
                     Bookmark: serializers.HyperlinkedRelatedField(
-                        view_name='bookmark-detail'),
+                        view_name='bookmark-detail',
+                        queryset=Bookmark.objects.all()),
                     Note: serializers.HyperlinkedRelatedField(
-                        view_name='note-detail'),
+                        view_name='note-detail',
+                        queryset=Note.objects.all()),
                 },
-                source='tagged_item',
                 read_only=True,
             )
 
@@ -102,7 +100,7 @@ class TestGenericRelatedFieldDeserialization(TestCase):
             tagged_item = GenericRelatedField({
                 Bookmark: BookmarkSerializer(),
                 Note: NoteSerializer(),
-            }, source='tagged_item', read_only=True)
+            }, read_only=True)
 
             class Meta:
                 model = Tag
@@ -137,9 +135,9 @@ class TestGenericRelatedFieldDeserialization(TestCase):
                 {
                     Bookmark: BookmarkSerializer(),
                     Note: serializers.HyperlinkedRelatedField(
-                        view_name='note-detail'),
+                        view_name='note-detail',
+                        queryset=Note.objects.all()),
                 },
-                source='tagged_item',
                 read_only=True,
             )
 
@@ -173,27 +171,27 @@ class TestGenericRelatedFieldDeserialization(TestCase):
         class TagSerializer(serializers.ModelSerializer):
             tagged_item = GenericRelatedField({
                 Bookmark: BookmarkSerializer(),
-            }, source='tagged_item', read_only=True)
+            }, read_only=True)
 
             class Meta:
                 model = Tag
                 exclude = ('id', 'content_type', 'object_id', )
         serializer = TagSerializer(Tag.objects.all(), many=True)
 
-        def call_data():
-            return serializer.data
-        self.assertRaises(ValidationError, call_data)
+        with self.assertRaises(ValidationError):
+            serializer.data
 
     def test_relation_as_null(self):
         class DetachableSerializer(serializers.ModelSerializer):
             content_object = GenericRelatedField(
                 {
                     Bookmark: serializers.HyperlinkedRelatedField(
-                        view_name='bookmark-detail'),
+                        view_name='bookmark-detail',
+                        queryset=Bookmark.objects.all()),
                     Note: serializers.HyperlinkedRelatedField(
-                        view_name='note-detail'),
+                        view_name='note-detail',
+                        queryset=Note.objects.all()),
                 },
-                source='content_object',
                 read_only=True,
             )
 
@@ -215,9 +213,8 @@ class TestGenericRelatedFieldDeserialization(TestCase):
         self.assertEqual(serializer.data, expected)
 
 
+@override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')
 class TestGenericRelatedFieldSerialization(TestCase):
-
-    urls = 'generic_relations.tests.test_relations'
 
     def setUp(self):
         self.bookmark = Bookmark.objects.create(
@@ -231,11 +228,12 @@ class TestGenericRelatedFieldSerialization(TestCase):
             tagged_item = GenericRelatedField(
                 {
                     Bookmark: serializers.HyperlinkedRelatedField(
-                        view_name='bookmark-detail'),
+                        view_name='bookmark-detail',
+                        queryset=Bookmark.objects.all()),
                     Note: serializers.HyperlinkedRelatedField(
-                        view_name='note-detail'),
+                        view_name='note-detail',
+                        queryset=Note.objects.all()),
                 },
-                source='tagged_item',
                 read_only=False,
             )
 
@@ -247,7 +245,7 @@ class TestGenericRelatedFieldSerialization(TestCase):
             'tag': 'reminder',
             'tagged_item': reverse('note-detail', kwargs={'pk': self.note.pk})
         }, context={'request': request})
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         expected = {
             'tagged_item': 'http://testserver/note/1/',
             'tag': 'reminder'
@@ -260,9 +258,9 @@ class TestGenericRelatedFieldSerialization(TestCase):
                 {
                     Bookmark: BookmarkSerializer(),
                     Note: serializers.HyperlinkedRelatedField(
-                        view_name='note-detail'),
+                        view_name='note-detail',
+                        queryset=Note.objects.all()),
                 },
-                source='tagged_item',
                 read_only=False,
             )
 
@@ -284,10 +282,10 @@ class TestGenericRelatedFieldSerialization(TestCase):
             tagged_item = GenericRelatedField(
                 {
                     Bookmark: serializers.HyperlinkedRelatedField(
-                        view_name='bookmark-detail'),
+                        view_name='bookmark-detail',
+                        queryset=Bookmark.objects.all()),
                 },
-                source='tagged_item',
-                read_only=False,
+                read_only=False
             )
 
             class Meta:
@@ -305,9 +303,9 @@ class TestGenericRelatedFieldSerialization(TestCase):
             tagged_item = GenericRelatedField(
                 {
                     Bookmark: serializers.HyperlinkedRelatedField(
-                        view_name='bookmark-detail'),
+                        view_name='bookmark-detail',
+                        queryset=Bookmark.objects.all()),
                 },
-                source='tagged_item',
                 read_only=False,
             )
 
@@ -331,11 +329,12 @@ class TestGenericRelatedFieldSerialization(TestCase):
             tagged_item = GenericRelatedField(
                 {
                     Bookmark: serializers.HyperlinkedRelatedField(
-                        view_name='bookmark-detail'),
+                        view_name='bookmark-detail',
+                        queryset=Bookmark.objects.all()),
                     Note: serializers.HyperlinkedRelatedField(
-                        view_name='note-detail'),
+                        view_name='note-detail',
+                        queryset=Note.objects.all()),
                 },
-                source='tagged_item',
                 read_only=False,
             )
 
@@ -347,7 +346,7 @@ class TestGenericRelatedFieldSerialization(TestCase):
             'tag': 'reminder',
             'tagged_item': reverse('note-detail', kwargs={'pk': self.note.pk})
         })
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         tag = Tag.objects.get(pk=3)
         self.assertEqual(tag.tagged_item, self.note)
@@ -357,11 +356,12 @@ class TestGenericRelatedFieldSerialization(TestCase):
             content_object = GenericRelatedField(
                 {
                     Bookmark: serializers.HyperlinkedRelatedField(
-                        view_name='bookmark-detail'),
+                        view_name='bookmark-detail',
+                        queryset=Bookmark.objects.all()),
                     Note: serializers.HyperlinkedRelatedField(
-                        view_name='note-detail'),
+                        view_name='note-detail',
+                        queryset=Note.objects.all()),
                 },
-                source='content_object',
                 read_only=False,
                 required=False
             )
@@ -371,7 +371,7 @@ class TestGenericRelatedFieldSerialization(TestCase):
                 exclude = ('id', 'content_type', 'object_id', )
 
         serializer = DetachableSerializer(data={'name': 'foo'})
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         freeagent = Detachable.objects.get(pk=1)
         self.assertEqual(freeagent.name, 'foo')
