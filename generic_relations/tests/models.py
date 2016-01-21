@@ -1,5 +1,11 @@
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+
+try:
+    from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+except ImportError:
+    # django < 1.7
+    from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+
 from django.db import models
 
 
@@ -10,7 +16,7 @@ class Tag(models.Model):
     tag = models.SlugField()
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
-    tagged_item = generic.GenericForeignKey('content_type', 'object_id')
+    tagged_item = GenericForeignKey('content_type', 'object_id')
 
     def __unicode__(self):
         return self.tag
@@ -23,7 +29,7 @@ class Detachable(models.Model):
     name = models.CharField(max_length=50)
     content_type = models.ForeignKey(ContentType, null=True, blank=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
 
 
 class Bookmark(models.Model):
@@ -31,7 +37,7 @@ class Bookmark(models.Model):
     A URL bookmark that may have multiple tags attached.
     """
     url = models.URLField()
-    tags = generic.GenericRelation(Tag)
+    tags = GenericRelation(Tag)
 
     def __unicode__(self):
         return 'Bookmark: %s' % self.url
@@ -42,7 +48,7 @@ class Note(models.Model):
     A textual note that may have multiple tags attached.
     """
     text = models.TextField()
-    tags = generic.GenericRelation(Tag)
+    tags = GenericRelation(Tag)
 
     def __unicode__(self):
         return 'Note: %s' % self.text

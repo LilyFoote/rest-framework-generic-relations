@@ -30,22 +30,18 @@ class GenericRelatedField(serializers.Field):
         """
         super(GenericRelatedField, self).__init__(*args, **kwargs)
         self.serializers = serializers
+        for serializer in self.serializers.values():
+            serializer.bind('', self)
 
     def to_internal_value(self, data):
         try:
             serializer = self.determine_serializer_for_data(data)
         except ImproperlyConfigured as e:
             raise ValidationError(e)
-        # Necessary because of context, field resolving etc.
-        serializer.bind(self.field_name, self.parent)
         return serializer.to_internal_value(data)
 
     def to_representation(self, instance):
         serializer = self.determine_deserializer_for_data(instance)
-        # clear source before binding, to avoid an AssertionError
-        serializer.source = None
-        # Necessary because of context, field resolving etc.
-        serializer.bind(self.field_name, self.parent)
         return serializer.to_representation(instance)
 
     def determine_deserializer_for_data(self, instance):
@@ -58,7 +54,7 @@ class GenericRelatedField(serializers.Field):
 
     def determine_serializer_for_data(self, value):
         # While one could easily execute the "try" block within
-        # from_native and reduce operations, I consider the concept of
+        # to_internal_value and reduce operations, I consider the concept of
         # serializing is already very naive and vague, that's why I'd
         # go for stringency with the deserialization process here.
         serializers = []

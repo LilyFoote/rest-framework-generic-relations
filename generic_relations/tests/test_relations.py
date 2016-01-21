@@ -181,9 +181,8 @@ class TestGenericRelatedFieldDeserialization(TestCase):
                 exclude = ('id', 'content_type', 'object_id', )
         serializer = TagSerializer(Tag.objects.all(), many=True)
 
-        def call_data():
-            return serializer.data
-        self.assertRaises(ValidationError, call_data)
+        with self.assertRaises(ValidationError):
+            serializer.data
 
     def test_relation_as_null(self):
         class DetachableSerializer(serializers.ModelSerializer):
