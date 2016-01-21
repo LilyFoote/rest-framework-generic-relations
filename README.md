@@ -138,7 +138,7 @@ The following operations would create a `Tag` object with it's `tagged_object` p
     tag_serializer.is_valid()
     tag_serializer.save()
 
-If you feel that this default behavior doesn't suit your needs, you can subclass `GenericRelatedField` and override its `determine_deserializer_for_data` or `determine_serializer_for_data` respectively to implement your own way of decision-making.
+If you feel that this default behavior doesn't suit your needs, you can subclass `GenericRelatedField` and override its `get_serializer_for_instance` or `get_deserializer_for_data` respectively to implement your own way of decision-making.
 
 A few things you should note:
 
