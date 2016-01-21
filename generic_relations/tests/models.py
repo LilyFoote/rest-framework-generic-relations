@@ -1,10 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
-
-try:
-    from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-except ImportError:
-    # django < 1.7
-    from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 
 from django.db import models
 
