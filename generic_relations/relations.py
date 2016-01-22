@@ -14,8 +14,8 @@ __all__ = ('GenericRelatedField',)
 
 class RenamedMethods(RenameMethodsBase):
     renamed_methods = (
-        ('determine_deserializer_for_data', 'get_serializer_for_instance', UserWarning),
-        ('determine_serializer_for_data', 'get_deserializer_for_data', UserWarning),
+        ('determine_deserializer_for_data', 'get_serializer_for_instance', DeprecationWarning),
+        ('determine_serializer_for_data', 'get_deserializer_for_data', DeprecationWarning),
     )
 
 

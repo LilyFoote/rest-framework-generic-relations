@@ -14,6 +14,9 @@ from generic_relations.relations import GenericRelatedField
 from generic_relations.tests.models import Bookmark, Detachable, Note, Tag
 
 
+warnings.simplefilter("default", DeprecationWarning)
+
+
 factory = RequestFactory()
 # Just to ensure we have a request in the serializer context
 request = factory.get('/')
@@ -221,7 +224,7 @@ class TestGenericRelatedFieldSerialization(TestCase):
                     return super(MyRelatedField, self).determine_deserializer_for_data(value)
 
             self.assertEqual(len(w), 1)
-            self.assertIs(w[0].category, UserWarning)
+            self.assertIs(w[0].category, DeprecationWarning)
 
     def test_deprecated_method_called(self):
         f = GenericRelatedField({
@@ -234,9 +237,9 @@ class TestGenericRelatedFieldSerialization(TestCase):
         })
         with warnings.catch_warnings(record=True) as w:
             f.determine_deserializer_for_data(self.bookmark)
-            
+
             self.assertEqual(len(w), 1)
-            self.assertIs(w[0].category, UserWarning)
+            self.assertIs(w[0].category, DeprecationWarning)
 
 
 @override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')
@@ -409,7 +412,7 @@ class TestGenericRelatedFieldDeserialization(TestCase):
                     return super(MyRelatedField, self).determine_serializer_for_data(value)
 
             self.assertEqual(len(w), 1)
-            self.assertIs(w[0].category, UserWarning)
+            self.assertIs(w[0].category, DeprecationWarning)
 
     def test_deprecated_method_called(self):
         f = GenericRelatedField({
@@ -421,4 +424,4 @@ class TestGenericRelatedFieldDeserialization(TestCase):
             f.determine_serializer_for_data('http://testserver/bookmark/1/')
 
             self.assertEqual(len(w), 1)
-            self.assertIs(w[0].category, UserWarning)
+            self.assertIs(w[0].category, DeprecationWarning)
