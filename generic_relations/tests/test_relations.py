@@ -214,17 +214,16 @@ class TestGenericRelatedFieldSerialization(TestCase):
         ]
         self.assertEqual(serializer.data, expected)
 
-    def test_deprecated_methods_overridden(self):
+    def test_deprecated_method_overridden(self):
         with warnings.catch_warnings(record=True) as w:
             class MyRelatedField(GenericRelatedField):
                 def determine_deserializer_for_data(self, value):
                     return super(MyRelatedField, self).determine_deserializer_for_data(value)
-                def determine_serializer_for_data(self, value):
-                    return super(MyRelatedField, self).determine_serializer_for_data(value)
 
-            self.assertEqual(len(w), 2)
+            self.assertEqual(len(w), 1)
+            self.assertIs(w[0].category, UserWarning)
 
-    def test_deprecated_methods_called(self):
+    def test_deprecated_method_called(self):
         f = GenericRelatedField({
             Bookmark: serializers.HyperlinkedRelatedField(
                 view_name='bookmark-detail',
@@ -235,7 +234,9 @@ class TestGenericRelatedFieldSerialization(TestCase):
         })
         with warnings.catch_warnings(record=True) as w:
             f.determine_deserializer_for_data(self.bookmark)
+            
             self.assertEqual(len(w), 1)
+            self.assertIs(w[0].category, UserWarning)
 
 
 @override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')
@@ -400,3 +401,24 @@ class TestGenericRelatedFieldDeserialization(TestCase):
         freeagent = Detachable.objects.get(pk=1)
         self.assertEqual(freeagent.name, 'foo')
         self.assertEqual(freeagent.content_object, None)
+
+    def test_deprecated_method_overridden(self):
+        with warnings.catch_warnings(record=True) as w:
+            class MyRelatedField(GenericRelatedField):
+                def determine_serializer_for_data(self, value):
+                    return super(MyRelatedField, self).determine_serializer_for_data(value)
+
+            self.assertEqual(len(w), 1)
+            self.assertIs(w[0].category, UserWarning)
+
+    def test_deprecated_method_called(self):
+        f = GenericRelatedField({
+            Bookmark: serializers.HyperlinkedRelatedField(
+                view_name='bookmark-detail',
+                queryset=Bookmark.objects.all()),
+        })
+        with warnings.catch_warnings(record=True) as w:
+            f.determine_serializer_for_data('http://testserver/bookmark/1/')
+
+            self.assertEqual(len(w), 1)
+            self.assertIs(w[0].category, UserWarning)
