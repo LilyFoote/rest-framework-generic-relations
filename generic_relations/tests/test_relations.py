@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import warnings
+
 from django.conf.urls import url
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.test import TestCase, RequestFactory
@@ -10,6 +12,9 @@ from rest_framework.reverse import reverse
 
 from generic_relations.relations import GenericRelatedField
 from generic_relations.tests.models import Bookmark, Detachable, Note, Tag
+
+
+warnings.simplefilter("default", DeprecationWarning)
 
 
 factory = RequestFactory()
@@ -46,7 +51,7 @@ class NoteSerializer(serializers.ModelSerializer):
 
 
 @override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')
-class TestGenericRelatedFieldDeserialization(TestCase):
+class TestGenericRelatedFieldSerialization(TestCase):
     def setUp(self):
         self.bookmark = Bookmark.objects.create(
             url='https://www.djangoproject.com/')
@@ -212,10 +217,33 @@ class TestGenericRelatedFieldDeserialization(TestCase):
         ]
         self.assertEqual(serializer.data, expected)
 
+    def test_deprecated_method_overridden(self):
+        with warnings.catch_warnings(record=True) as w:
+            class MyRelatedField(GenericRelatedField):
+                def determine_deserializer_for_data(self, value):
+                    return super(MyRelatedField, self).determine_deserializer_for_data(value)
+
+            self.assertEqual(len(w), 1)
+            self.assertIs(w[0].category, DeprecationWarning)
+
+    def test_deprecated_method_called(self):
+        f = GenericRelatedField({
+            Bookmark: serializers.HyperlinkedRelatedField(
+                view_name='bookmark-detail',
+                queryset=Bookmark.objects.all()),
+            Note: serializers.HyperlinkedRelatedField(
+                view_name='note-detail',
+                queryset=Note.objects.all()),
+        })
+        with warnings.catch_warnings(record=True) as w:
+            f.determine_deserializer_for_data(self.bookmark)
+
+            self.assertEqual(len(w), 1)
+            self.assertIs(w[0].category, DeprecationWarning)
+
 
 @override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')
-class TestGenericRelatedFieldSerialization(TestCase):
-
+class TestGenericRelatedFieldDeserialization(TestCase):
     def setUp(self):
         self.bookmark = Bookmark.objects.create(
             url='https://www.djangoproject.com/')
@@ -275,7 +303,7 @@ class TestGenericRelatedFieldSerialization(TestCase):
 
         with self.assertRaises(ImproperlyConfigured):
             tagged_item = serializer.fields['tagged_item']
-            tagged_item.determine_serializer_for_data('just a string')
+            tagged_item.get_deserializer_for_data('just a string')
 
     def test_not_registered_view_name(self):
         class TagSerializer(serializers.ModelSerializer):
@@ -376,3 +404,24 @@ class TestGenericRelatedFieldSerialization(TestCase):
         freeagent = Detachable.objects.get(pk=1)
         self.assertEqual(freeagent.name, 'foo')
         self.assertEqual(freeagent.content_object, None)
+
+    def test_deprecated_method_overridden(self):
+        with warnings.catch_warnings(record=True) as w:
+            class MyRelatedField(GenericRelatedField):
+                def determine_serializer_for_data(self, value):
+                    return super(MyRelatedField, self).determine_serializer_for_data(value)
+
+            self.assertEqual(len(w), 1)
+            self.assertIs(w[0].category, DeprecationWarning)
+
+    def test_deprecated_method_called(self):
+        f = GenericRelatedField({
+            Bookmark: serializers.HyperlinkedRelatedField(
+                view_name='bookmark-detail',
+                queryset=Bookmark.objects.all()),
+        })
+        with warnings.catch_warnings(record=True) as w:
+            f.determine_serializer_for_data('http://testserver/bookmark/1/')
+
+            self.assertEqual(len(w), 1)
+            self.assertIs(w[0].category, DeprecationWarning)

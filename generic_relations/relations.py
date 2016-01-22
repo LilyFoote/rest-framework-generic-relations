@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.utils.deprecation import RenameMethodsBase
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django import forms
@@ -8,7 +9,17 @@ from rest_framework.compat import six
 from rest_framework import serializers
 
 
-class GenericRelatedField(serializers.Field):
+__all__ = ('GenericRelatedField',)
+
+
+class RenamedMethods(RenameMethodsBase):
+    renamed_methods = (
+        ('determine_deserializer_for_data', 'get_serializer_for_instance', DeprecationWarning),
+        ('determine_serializer_for_data', 'get_deserializer_for_data', DeprecationWarning),
+    )
+
+
+class GenericRelatedField(six.with_metaclass(RenamedMethods, serializers.Field)):
     """
     Represents a generic relation foreign key.
     It's actually more of a wrapper, that delegates the logic to registered
@@ -35,16 +46,16 @@ class GenericRelatedField(serializers.Field):
 
     def to_internal_value(self, data):
         try:
-            serializer = self.determine_serializer_for_data(data)
+            serializer = self.get_deserializer_for_data(data)
         except ImproperlyConfigured as e:
             raise ValidationError(e)
         return serializer.to_internal_value(data)
 
     def to_representation(self, instance):
-        serializer = self.determine_deserializer_for_data(instance)
+        serializer = self.get_serializer_for_instance(instance)
         return serializer.to_representation(instance)
 
-    def determine_deserializer_for_data(self, instance):
+    def get_serializer_for_instance(self, instance):
         try:
             model = instance.__class__
             serializer = self.serializers[model]
@@ -52,7 +63,7 @@ class GenericRelatedField(serializers.Field):
             raise ValidationError(self.error_messages['no_model_match'])
         return serializer
 
-    def determine_serializer_for_data(self, value):
+    def get_deserializer_for_data(self, value):
         # While one could easily execute the "try" block within
         # to_internal_value and reduce operations, I consider the concept of
         # serializing is already very naive and vague, that's why I'd
