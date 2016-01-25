@@ -132,6 +132,63 @@ The following operations would create a `TaggedItem` object with it's `tagged_ob
 
 If you feel that this default behavior doesn't suit your needs, you can subclass `GenericRelatedField` and override its `get_serializer_for_instance` or `get_deserializer_for_data` respectively to implement your own way of decision-making.
 
+## GenericModelSerializer
+
+Sometimes you may want to serialize a single list of different top-level things. For instance, suppose I have an API view that returns what items are on my bookshelf. Let's define some models:
+
+```python
+    class Book(models.Model):
+        title = serializers.CharField()
+        author = serializers.CharField()
+
+    class Bluray(models.Model):
+        title = models.CharField()
+        rating = models.PositiveSmallIntegerField(max_value=5)
+```
+
+Then we could have a serializer for each type of object:
+
+```python
+    class BookSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Book
+            exclude = ('id', )
+
+    class BluraySerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Bluray
+            exclude = ('id', )    
+```
+
+Now we can create a generic list serializer, which delegates to the above serializers based on the type of model it's serializing:
+
+```python
+    bookshelf_item_serializer = GenericModelSerializer({
+        Book: BookSerializer(),
+        Bluray: BluraySerializer(),
+    }, many=True)
+
+```
+
+Then we can serialize a mixed list of items:
+
+```python
+    >>> bookshelf_item_serializer.to_representation([
+        Book.objects.get(title='War and Peace'),
+        Bluray.objects.get(title='Die Hard'),
+        Bluray.objects.get(title='Shawshank Redemption'),
+        Book.objects.get(title='To Kill a Mockingbird'),
+    ])
+
+    [
+        {'title': 'War and Peace', 'author': 'Leo Tolstoy'},
+        {'title': 'Die Hard', 'rating': 5},
+        {'title': 'Shawshank Redemption', 'rating': 5},
+        {'title': 'To Kill a Mockingbird', 'author': 'Harper Lee'}
+    ]
+```
+
+
 ## A few things you should note:
 
 * Although `GenericForeignKey` fields can be set to any model object, the `GenericRelatedField` only handles models explicitly defined in its configuration dictionary.
