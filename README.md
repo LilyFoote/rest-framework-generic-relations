@@ -1,17 +1,18 @@
 # Rest Framework Generic Relations [![Build Status](https://travis-ci.org/Ian-Foote/rest-framework-generic-relations.svg?branch=pep8)](https://travis-ci.org/Ian-Foote/rest-framework-generic-relations)
 
+This library implements [Django REST Framework](http://www.django-rest-framework.org/) serializers to handle generic foreign keys.
+
 # API Reference
 
-If you want to serialize a generic foreign key, you need to define a `GenericRelatedField` with a configuration dictionary as first argument, that describes the representation of each model you possibly want to connect to the generic foreign key.
+## GenericRelatedField
 
-For example, given the following model for a tag, which has a generic relationship with other arbitrary models:
+This field serializes generic foreign keys. For a primer on generic foreign keys, first see: https://docs.djangoproject.com/en/dev/ref/contrib/contenttypes/
 
+
+Let's assume a `TaggedItem` model which has a generic relationship with other arbitrary models:
+
+```python
     class TaggedItem(models.Model):
-        """
-        Tags arbitrary model instances using a generic relation.
-
-        See: https://docs.djangoproject.com/en/dev/ref/contrib/contenttypes/
-        """
         tag_name = models.SlugField()
         content_type = models.ForeignKey(ContentType)
         object_id = models.PositiveIntegerField()
@@ -19,9 +20,11 @@ For example, given the following model for a tag, which has a generic relationsh
 
         def __unicode__(self):
             return self.tag
+```
 
-And the following two models, which may be have associated tags:
+And the following two models, which may have associated tags:
 
+```python
     class Bookmark(models.Model):
         """
         A bookmark consists of a URL, and 0 or more descriptive tags.
@@ -29,63 +32,62 @@ And the following two models, which may be have associated tags:
         url = models.URLField()
         tags = GenericRelation(TaggedItem)
 
-
     class Note(models.Model):
         """
         A note consists of some text, and 0 or more descriptive tags.
         """
         text = models.CharField(max_length=1000)
         tags = GenericRelation(TaggedItem)
+```
 
 Now we define serializers for each model that may get associated with tags.
 
+```python
     class BookmarkSerializer(serializers.ModelSerializer):
-        """
-        A simple `ModelSerializer` subclass for serializing `Bookmark` objects.
-        """
         class Meta:
             model = Bookmark
             exclude = ('id', )
 
-
     class NoteSerializer(serializers.ModelSerializer):
-        """
-        A simple `ModelSerializer` subclass for serializing `Note` objects.
-        """
         class Meta:
             model = Note
             exclude = ('id', )
+```
 
-The model serializer for the `Tag` model could look like this:
+The model serializer for the `TaggedItem` model could look like this:
 
+```python
     from generic_relations.relations import GenericRelatedField
-
 
     class TagSerializer(serializers.ModelSerializer):
         """
-        A `Tag` serializer with a `GenericRelatedField` mapping all possible
+        A `TaggedItem` serializer with a `GenericRelatedField` mapping all possible
         models to their respective serializers.
         """
         tagged_object = GenericRelatedField({
             Bookmark: BookmarkSerializer(),
             Note: NoteSerializer()
-        }, read_only=True)
+        })
 
         class Meta:
-            model = Tag
+            model = TaggedItem
             exclude = ('id', )
+```
 
-The JSON representation of a `Tag` object with `name='django'` and its generic foreign key pointing at a `Bookmark` object with `url='https://www.djangoproject.com/'` would look like this:
+The JSON representation of a `TaggedItem` object with `name='django'` and its generic foreign key pointing at a `Bookmark` object with `url='https://www.djangoproject.com/'` would look like this:
 
+```json
     {
-        'tagged_object': {
-            'url': 'https://www.djangoproject.com/'
+        "tagged_object": {
+            "url": "https://www.djangoproject.com/"
         },
-        'tag_name': 'django'
+        "tag_name": "django"
     }
+```
 
 If you want to have your generic foreign key represented as hyperlink, simply use `HyperlinkedRelatedField` objects:
 
+```python
     class TagSerializer(serializers.ModelSerializer):
         """
         A `Tag` serializer with a `GenericRelatedField` mapping all possible
@@ -94,42 +96,31 @@ If you want to have your generic foreign key represented as hyperlink, simply us
         tagged_object = serializers.GenericRelatedField({
             Bookmark: serializers.HyperlinkedRelatedField(view_name='bookmark-detail'),
             Note: serializers.HyperlinkedRelatedField(view_name='note-detail'),
-        }, read_only=True)
+        })
 
         class Meta:
-            model = Tag
+            model = TaggedItem
             exclude = ('id', )
+```
 
-The JSON representation of the same `Tag` example object could now look something like this:
+The JSON representation of the same `TaggedItem` example object could now look something like this:
 
+```json
     {
-        'tagged_object': '/bookmark/1/',
-        'tag_name': 'django'
+        "tagged_object": "/bookmark/1/",
+        "tag_name": "django"
     }
+```
 
-These examples cover the default behavior of generic foreign key representation. However, you may also want to write to generic foreign key fields through your API.
+## Writing to generic foreign keys
 
-By default, a `GenericRelatedField` iterates over its nested serializers and returns the value of the first serializer, that is actually able to perform `from_native` on the input value without any errors.
+The above `TagSerializer` is also writable. By default, a `GenericRelatedField` iterates over its nested serializers and returns the value of the first serializer that is actually able to perform `to_internal_value()` without any errors.
 Note, that (at the moment) only `HyperlinkedRelatedField` is able to serialize model objects out of the box.
 
-This `Tag` serializer is able to write to it's generic foreign key field:
 
-    class TagSerializer(serializers.ModelSerializer):
-            """
-            A `Tag` serializer with a `GenericRelatedField` mapping all possible
-            models to properly set up `HyperlinkedRelatedField`s.
-            """
-            tagged_object = GenericRelatedField({
-                Bookmark: serializers.HyperlinkedRelatedField(view_name='bookmark-detail'),
-                Note: serializers.HyperlinkedRelatedField(view_name='note-detail'),
-            }, read_only=False)
+The following operations would create a `TaggedItem` object with it's `tagged_object` property pointing at the `Bookmark` object found at the given detail end point.
 
-            class Meta:
-                model = Tag
-                exclude = ('id', )
-
-The following operations would create a `Tag` object with it's `tagged_object` property pointing at the `Bookmark` object found at the given detail end point.
-
+```python
     tag_serializer = TagSerializer(data={
         'tag_name': 'python'
         'tagged_object': '/bookmark/1/'
@@ -137,14 +128,13 @@ The following operations would create a `Tag` object with it's `tagged_object` p
 
     tag_serializer.is_valid()
     tag_serializer.save()
+```
 
 If you feel that this default behavior doesn't suit your needs, you can subclass `GenericRelatedField` and override its `get_serializer_for_instance` or `get_deserializer_for_data` respectively to implement your own way of decision-making.
 
-A few things you should note:
+## A few things you should note:
 
 * Although `GenericForeignKey` fields can be set to any model object, the `GenericRelatedField` only handles models explicitly defined in its configuration dictionary.
 * Reverse generic keys, expressed using the `GenericRelation` field, can be serialized using the regular relational field types, since the type of the target in the relationship is always known.
-* Please take into account that the order in which you register serializers matters as far as write operations are concerned.
-* Unless you provide custom serializer determination, only `HyperlinkedRelatedFields` provide write access to generic model relations.
-
-For more information see [the Django documentation on generic relations][generic-relations].
+* The order in which you register serializers matters as far as write operations are concerned.
+* Unless you provide a custom `get_deserializer_for_data()` method, only `HyperlinkedRelatedField` provides write access to generic model relations.
