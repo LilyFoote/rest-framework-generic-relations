@@ -47,3 +47,8 @@ class Note(models.Model):
 
     def __unicode__(self):
         return 'Note: %s' % self.text
+
+
+class NoteProxy(Note):
+    class Meta:
+        proxy = True

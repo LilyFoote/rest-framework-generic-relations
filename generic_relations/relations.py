@@ -56,12 +56,14 @@ class GenericRelatedField(six.with_metaclass(RenamedMethods, serializers.Field))
         return serializer.to_representation(instance)
 
     def get_serializer_for_instance(self, instance):
-        try:
-            model = instance.__class__
-            serializer = self.serializers[model]
-        except KeyError:
-            raise ValidationError(self.error_messages['no_model_match'])
-        return serializer
+        # Use registered superclasses, rather than only the exact model.
+        # (But prefer things earlier in the MRO, so if the exact model is registered,
+        # use that in preference to any superclasses)
+        for klass in instance.__class__.mro():
+            if klass in self.serializers:
+                return self.serializers[klass]
+
+        raise ValidationError(self.error_messages['no_model_match'])
 
     def get_deserializer_for_data(self, value):
         # While one could easily execute the "try" block within
