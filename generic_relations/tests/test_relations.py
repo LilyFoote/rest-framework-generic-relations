@@ -11,7 +11,7 @@ from rest_framework import serializers
 from rest_framework.reverse import reverse
 
 from generic_relations.relations import GenericRelatedField
-from generic_relations.tests.models import Bookmark, Detachable, Note, Tag
+from generic_relations.tests.models import Bookmark, Detachable, Note, NoteProxy, Tag
 
 
 warnings.simplefilter("default", DeprecationWarning)
@@ -48,6 +48,17 @@ class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Note
         exclude = ('id', )
+
+
+class NoteProxySerializer(serializers.ModelSerializer):
+    text = serializers.SerializerMethodField()
+
+    class Meta:
+        model = NoteProxy
+        exclude = ('id',)
+
+    def get_text(self, instance):
+        return 'proxied: %s' % instance.text
 
 
 @override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')
@@ -240,6 +251,33 @@ class TestGenericRelatedFieldSerialization(TestCase):
 
             self.assertEqual(len(w), 1)
             self.assertIs(w[0].category, DeprecationWarning)
+
+    def test_subclass_uses_registered_parent(self):
+        tagged_item = GenericRelatedField({
+            Note: NoteSerializer(),
+        }, read_only=True)
+
+        # NoteProxy instance should use the NoteSerializer,
+        # since no more specific serializer is registered
+        proxied = NoteProxy.objects.get(pk=self.note.pk)
+        serializer = tagged_item.get_serializer_for_instance(proxied)
+        self.assertIsInstance(serializer, NoteSerializer)
+
+    def test_subclass_uses_registered_subclass(self):
+        tagged_item = GenericRelatedField({
+            Note: NoteSerializer(),
+            NoteProxy: NoteProxySerializer(),
+        }, read_only=True)
+
+        # NoteProxy instance should use the NoteProxySerializer in
+        # preference to the NoteSerializer
+        proxied = NoteProxy.objects.get(pk=self.note.pk)
+        serializer = tagged_item.get_serializer_for_instance(proxied)
+        self.assertIsInstance(serializer, NoteProxySerializer)
+
+        # But Note instance should use the NoteSerializer
+        serializer = tagged_item.get_serializer_for_instance(self.note)
+        self.assertIsInstance(serializer, NoteSerializer)
 
 
 @override_settings(ROOT_URLCONF='generic_relations.tests.test_relations')

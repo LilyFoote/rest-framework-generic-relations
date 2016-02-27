@@ -24,4 +24,3 @@ class GenericRelatedField(six.with_metaclass(RenamedMethods, GenericSerializerMi
     It's actually more of a wrapper, that delegates the logic to registered
     serializers based on the `Model` class.
     """
-
