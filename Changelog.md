@@ -2,8 +2,10 @@
 
 ## v1.1.0
 
-* Renamed `determine_serializer_for_data` to `get_deserializer_for_data`
-* Renamed `determine_deserializer_for_data` to `get_serializer_for_instance`
+* Add `GenericModelSerializer` as a counterpart to `GenericRelatedField`.
+* Dynamically determine the best serializer to use to serialize a model instance.
+* Rename `determine_serializer_for_data` to `get_deserializer_for_data`
+* Rename `determine_deserializer_for_data` to `get_serializer_for_instance`
 
 ## v1.0.0
 
