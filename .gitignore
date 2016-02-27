@@ -3,6 +3,7 @@ __pycache__
 MANIFEST
 dist/
 build/
+_build/
 *.egg-info/
 .eggs
 .tox

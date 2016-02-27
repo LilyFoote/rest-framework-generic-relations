@@ -3,15 +3,31 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Rest Framework Generic Relations's documentation!
-============================================================
-
-Contents:
+Rest Framework Generic Relations
+================================
 
 .. toctree::
    :maxdepth: 2
 
+This library adds support for :django:ref:`generic-relations` to Django Rest Framework serializers.
 
+Installation
+------------
+
+Install Rest Framework Generic Relations by running::
+
+    pip install rest-framework-generic-relations
+
+Contribute
+----------
+
+- Issue Tracker: https://github.com/Ian-Foote/rest-framework-generic-relations/issues
+- Source Code: https://github.com/Ian-Foote/rest-framework-generic-relations/
+
+License
+-------
+
+Rest Framework Generic Relations is licensed under the BSD license.
 
 Indices and tables
 ==================
