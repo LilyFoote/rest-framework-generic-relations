@@ -6,12 +6,12 @@
 Rest Framework Generic Relations
 ================================
 
+This library adds support for :django:ref:`generic-relations` to `Django Rest Framework serializers <http://www.django-rest-framework.org/api-guide/serializers/>`_.
+
 .. toctree::
     :maxdepth: 2
 
     quickstart
-
-This library adds support for :django:ref:`generic-relations` to `Django Rest Framework serializers <http://www.django-rest-framework.org/api-guide/serializers/>`_.
 
 Installation
 ------------
