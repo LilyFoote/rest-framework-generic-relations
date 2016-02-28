@@ -21,8 +21,8 @@ Install Rest Framework Generic Relations by running::
 Contribute
 ----------
 
-- Issue Tracker: https://github.com/Ian-Foote/rest-framework-generic-relations/issues
-- Source Code: https://github.com/Ian-Foote/rest-framework-generic-relations/
+- `Issue Tracker <https://github.com/Ian-Foote/rest-framework-generic-relations/issues>`_
+- `Source Code <https://github.com/Ian-Foote/rest-framework-generic-relations/>`_
 
 License
 -------
