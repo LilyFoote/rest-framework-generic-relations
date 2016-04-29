@@ -4,8 +4,6 @@ This library implements [Django REST Framework](http://www.django-rest-framework
 
 # Installation
 
-Install using pip...
-
 Install using `pip`...
 
     pip install  rest-framework-generic-relations
