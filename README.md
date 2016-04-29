@@ -2,6 +2,23 @@
 
 This library implements [Django REST Framework](http://www.django-rest-framework.org/) serializers to handle generic foreign keys.
 
+# Installation
+
+Install using pip...
+
+Install using `pip`...
+
+    pip install  rest-framework-generic-relations
+
+Add `'generic_relations'` to your `INSTALLED_APPS` setting.
+
+    INSTALLED_APPS = (
+        ...
+        'generic_relations',
+    )
+
+
+
 # API Reference
 
 ## GenericRelatedField
