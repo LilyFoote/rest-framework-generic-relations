@@ -21,14 +21,14 @@ class GenericSerializerMixin(object):
 
     form_field_class = forms.URLField
 
-    def __init__(self, serializers, *args, **kwargs):
+    def __init__(self, model_to_serializer_mapping, *args, **kwargs):
         """
-        Needs an extra parameter `serializers` which has to be a dict
-        key: value being `Model`: serializer.
+        Needs an extra parameter `model_to_serializer_mapping`
+        which has to be a dictionary of {`Model`: `Serializer`}
         """
         super(GenericSerializerMixin, self).__init__(*args, **kwargs)
-        self.serializers = serializers
-        for serializer in self.serializers.values():
+        self.model_to_serializer_mapping = model_to_serializer_mapping
+        for serializer in self.model_to_serializer_mapping.values():
             serializer.bind('', self)
 
     def to_internal_value(self, data):
@@ -47,8 +47,8 @@ class GenericSerializerMixin(object):
         # (But prefer things earlier in the MRO, so if the exact model is registered,
         # use that in preference to any superclasses)
         for klass in instance.__class__.mro():
-            if klass in self.serializers:
-                return self.serializers[klass]
+            if klass in self.model_to_serializer_mapping:
+                return self.model_to_serializer_mapping[klass]
 
         raise ValidationError(self.error_messages['no_model_match'])
 
@@ -58,7 +58,7 @@ class GenericSerializerMixin(object):
         # serializing is already very naive and vague, that's why I'd
         # go for stringency with the deserialization process here.
         serializers = []
-        for serializer in six.itervalues(self.serializers):
+        for serializer in six.itervalues(self.model_to_serializer_mapping):
             try:
                 serializer.to_internal_value(value)
                 # Collects all serializers that can handle the input data.
