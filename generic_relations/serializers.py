@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 
@@ -38,7 +38,7 @@ class GenericSerializerMixin(object):
         try:
             serializer = self.get_deserializer_for_data(data)
         except ImproperlyConfigured as e:
-            raise ValidationError(e)
+            raise serializers.ValidationError(e)
         return serializer.to_internal_value(data)
 
     def to_representation(self, instance):
@@ -53,7 +53,7 @@ class GenericSerializerMixin(object):
             if klass in self.serializers:
                 return self.serializers[klass]
 
-        raise ValidationError(self.error_messages['no_model_match'])
+        raise serializers.ValidationError(self.error_messages['no_model_match'])
 
     def get_deserializer_for_data(self, value):
         # While one could easily execute the "try" block within
