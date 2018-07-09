@@ -9,7 +9,7 @@ class Tag(models.Model):
     Tags have a descriptive slug, and are attached to an arbitrary object.
     """
     tag = models.SlugField()
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     tagged_item = GenericForeignKey('content_type', 'object_id')
 
@@ -22,7 +22,8 @@ class Detachable(models.Model):
     Model with an optional GenericForeignKey relation
     """
     name = models.CharField(max_length=50)
-    content_type = models.ForeignKey(ContentType, null=True, blank=True)
+    content_type = models.ForeignKey(
+        ContentType, null=True, blank=True, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
