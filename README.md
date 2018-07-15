@@ -29,7 +29,7 @@ Let's assume a `TaggedItem` model which has a generic relationship with other ar
 ```python
 class TaggedItem(models.Model):
     tag_name = models.SlugField()
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     tagged_object = GenericForeignKey('content_type', 'object_id')
 ```

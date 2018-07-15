@@ -1,5 +1,9 @@
 # Rest Framework Generic Relations Changelog
 
+## v1.2.0
+
+* Add Django 2.0 support (need Python min 3.4, Django min. 1.11).
+
 ## v1.1.0
 
 * Add `GenericModelSerializer` as a counterpart to `GenericRelatedField`.
