@@ -463,3 +463,18 @@ class TestGenericRelatedFieldDeserialization(TestCase):
 
             self.assertEqual(len(w), 1)
             self.assertIs(w[0].category, DeprecationWarning)
+
+
+class TestGenericRelatedField(TestCase):
+    def test_multiple_declaration(self):
+        with self.assertRaises(RuntimeError):
+            class TagSerializer(serializers.ModelSerializer):
+                fields = {
+                    Bookmark: BookmarkSerializer(),
+                    Note: NoteSerializer(),
+                }
+                first = GenericRelatedField(fields)
+                second = GenericRelatedField(fields)
+
+                class Meta:
+                    model = Tag

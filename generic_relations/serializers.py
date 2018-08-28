@@ -29,6 +29,9 @@ class GenericSerializerMixin(object):
         super(GenericSerializerMixin, self).__init__(*args, **kwargs)
         self.serializers = serializers
         for serializer in self.serializers.values():
+            if serializer.source is not None:
+                msg = '{}() cannot be re-used. Create a new instance.'
+                raise RuntimeError(msg.format(type(serializer).__name__))
             serializer.bind('', self)
 
     def to_internal_value(self, data):

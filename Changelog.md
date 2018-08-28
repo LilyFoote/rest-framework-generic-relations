@@ -1,5 +1,8 @@
 # Rest Framework Generic Relations Changelog
 
+## v1.2.1
+* Add error handling for reusing a `Serializer` instance in a `GenericRelatedField`.
+
 ## v1.2.0
 
 * Add Django 2.0 support (need Python min 3.4, Django min. 1.11).
