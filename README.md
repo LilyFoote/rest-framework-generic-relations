@@ -105,7 +105,7 @@ class TagSerializer(serializers.ModelSerializer):
     A `Tag` serializer with a `GenericRelatedField` mapping all possible
     models to properly set up `HyperlinkedRelatedField`s.
     """
-    tagged_object = serializers.GenericRelatedField({
+    tagged_object = GenericRelatedField({
         Bookmark: serializers.HyperlinkedRelatedField(
             queryset = Bookmark.objects.all(),
             view_name='bookmark-detail',
