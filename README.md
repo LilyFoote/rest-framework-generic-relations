@@ -140,7 +140,7 @@ The following operations would create a `TaggedItem` object with it's `tagged_ob
 
 ```python
 tag_serializer = TagSerializer(data={
-    'tag_name': 'python'
+    'tag_name': 'python',
     'tagged_object': '/bookmark/1/'
 })
 
