@@ -5,16 +5,16 @@ This library implements [Django REST Framework](http://www.django-rest-framework
 # Installation
 
 Install using `pip`...
-
-    pip install  rest-framework-generic-relations
-
+```sh
+pip install  rest-framework-generic-relations
+```
 Add `'generic_relations'` to your `INSTALLED_APPS` setting.
-
-    INSTALLED_APPS = (
-        ...
-        'generic_relations',
-    )
-
+```python
+INSTALLED_APPS = (
+    ...
+    'generic_relations',
+)
+```
 
 
 # API Reference
