@@ -7,7 +7,8 @@ from setuptools import setup, find_packages
 version = '1.2.1'
 
 install_requires = [
-    'djangorestframework>=3.0.0,<4',
+    # no support for 3.9 yet, see #40
+    'djangorestframework>=3.0.0,<3.9',
 ]
 
 
