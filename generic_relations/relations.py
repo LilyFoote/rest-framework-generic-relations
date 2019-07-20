@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
+from django.utils import six
 from django.utils.deprecation import RenameMethodsBase
 
-from rest_framework.compat import six
 from rest_framework import serializers
 
 from .serializers import GenericSerializerMixin
