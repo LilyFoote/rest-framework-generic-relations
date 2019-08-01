@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
 
 from django.core.exceptions import ImproperlyConfigured
+from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 
-from rest_framework.compat import six
 from rest_framework import serializers
 
 
