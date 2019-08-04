@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import warnings
 
 from django.conf.urls import url
-from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.exceptions import ImproperlyConfigured
 from django.test import TestCase, RequestFactory
 from django.test.utils import override_settings
 
@@ -194,7 +194,7 @@ class TestGenericRelatedFieldSerialization(TestCase):
                 exclude = ('id', 'content_type', 'object_id', )
         serializer = TagSerializer(Tag.objects.all(), many=True)
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(serializers.ValidationError):
             serializer.data
 
     def test_relation_as_null(self):
