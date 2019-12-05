@@ -6,6 +6,7 @@ from django.utils.translation import ugettext_lazy as _
 from django import forms
 
 from rest_framework import serializers
+from rest_framework.settings import api_settings
 
 
 __all__ = ('GenericSerializerMixin', 'GenericModelSerializer',)
@@ -38,7 +39,7 @@ class GenericSerializerMixin(object):
         try:
             serializer = self.get_deserializer_for_data(data)
         except ImproperlyConfigured as e:
-            raise serializers.ValidationError(e)
+            raise serializers.ValidationError({api_settings.NON_FIELD_ERRORS_KEY: e})
         return serializer.to_internal_value(data)
 
     def to_representation(self, instance):

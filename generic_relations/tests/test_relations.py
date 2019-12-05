@@ -9,6 +9,7 @@ from django.test.utils import override_settings
 
 from rest_framework import serializers
 from rest_framework.reverse import reverse
+from rest_framework.settings import api_settings
 
 from generic_relations.relations import GenericRelatedField
 from generic_relations.tests.models import Bookmark, Detachable, Note, NoteProxy, Tag
@@ -385,7 +386,7 @@ class TestGenericRelatedFieldDeserialization(TestCase):
         })
 
         message = 'Could not determine a valid serializer for value %r.'
-        expected = {'tagged_item': [message % 'foo-bar']}
+        expected = {'tagged_item': {api_settings.NON_FIELD_ERRORS_KEY: message % 'foo-bar'}}
 
         self.assertFalse(serializer.is_valid())
         self.assertEqual(expected, serializer.errors)
