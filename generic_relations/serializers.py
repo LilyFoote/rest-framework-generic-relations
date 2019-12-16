@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
+import six
 
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 

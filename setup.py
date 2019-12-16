@@ -8,6 +8,7 @@ version = '1.2.2'
 
 install_requires = [
     'djangorestframework>=3.0.0,<3.11',
+    'six>=1.13.0',
 ]
 
 
