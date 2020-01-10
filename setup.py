@@ -4,15 +4,9 @@
 from setuptools import setup, find_packages
 
 
-version = '1.2.2'
-
-install_requires = [
-    'djangorestframework>=3.0.0',
-]
+version = '2.0.0'
 
 
-# note: These are all byte-strings on python 2, and unicode on python 3.
-# ... and that's how setuptools likes it. https://bugs.python.org/setuptools/issue152
 setup(
     name='rest-framework-generic-relations',
     version=version,
@@ -23,18 +17,19 @@ setup(
     author_email='python@ian.feete.org',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=install_requires,
+    install_requires=['djangorestframework>=3.8.0'],
+    python_requires='>=3.4',
     classifiers=[
         "Environment :: Web Environment",
         "Framework :: Django",
         "Intended Audience :: Developers",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],

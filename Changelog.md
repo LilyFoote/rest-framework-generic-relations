@@ -1,5 +1,16 @@
 # Rest Framework Generic Relations Changelog
 
+## v2.0.0
+
+* Add Python 3.8, Django 3.0 and DRF 3.11 support
+* Drop Python 2
+* Drop DRF 3.7
+
+Minimum supported dependencies are now:
+* Python 3.4
+* Django 1.11
+* DRF 3.8
+
 ## v1.2.1
 * Add error handling for reusing a `Serializer` instance in a `GenericRelatedField`.
 
