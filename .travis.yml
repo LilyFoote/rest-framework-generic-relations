@@ -1,17 +1,16 @@
 sudo: false
 language: python
 python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
+  # All supported djangoes work with python 3.7, so let's just use that.
+  # Running tests in all supported pythons feels like overkill.
+  # Run with `tox` locally if you really want to test other pythons; they're all listed in tox.ini
+  - "3.7"
 env:
-  - DJANGO_VERSION=1.11.22
-  - DJANGO_VERSION=2.0.13
-matrix:
-  exclude:
-    - python: "2.7"
-      env: DJANGO_VERSION=2.0.13
+  - "DJANGO_VERSION=1.11.22"
+  - "DJANGO_VERSION=2.0.13"
+  - "DJANGO_VERSION=2.1.0"
+  - "DJANGO_VERSION=2.2.8"
+  - "DJANGO_VERSION=3.0.0"
 install:
   - pip install -q Django~=$DJANGO_VERSION
   - pip install -e .

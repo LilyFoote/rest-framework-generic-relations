@@ -2,6 +2,10 @@
 
 This library implements [Django REST Framework](http://www.django-rest-framework.org/) serializers to handle generic foreign keys.
 
+# Requirements
+
+Any currently-supported combination of Django REST Framework, Python, and Django.
+
 # Installation
 
 Install using `pip`...

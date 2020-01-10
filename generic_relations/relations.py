@@ -1,6 +1,3 @@
-from __future__ import unicode_literals
-
-from django.utils import six
 from django.utils.deprecation import RenameMethodsBase
 
 from rest_framework import serializers
@@ -18,7 +15,7 @@ class RenamedMethods(RenameMethodsBase):
     )
 
 
-class GenericRelatedField(six.with_metaclass(RenamedMethods, GenericSerializerMixin, serializers.Field)):
+class GenericRelatedField(GenericSerializerMixin, serializers.Field, metaclass=RenamedMethods):
     """
     Represents a generic relation / foreign key.
     It's actually more of a wrapper, that delegates the logic to registered

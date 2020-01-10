@@ -1,7 +1,4 @@
-from __future__ import unicode_literals
-
 from django.core.exceptions import ImproperlyConfigured
-from django.utils import six
 from django.utils.translation import ugettext_lazy as _
 from django import forms
 
@@ -61,12 +58,12 @@ class GenericSerializerMixin(object):
         # serializing is already very naive and vague, that's why I'd
         # go for stringency with the deserialization process here.
         serializers = []
-        for serializer in six.itervalues(self.serializers):
+        for serializer in self.serializers.values():
             try:
                 serializer.to_internal_value(value)
                 # Collects all serializers that can handle the input data.
                 serializers.append(serializer)
-            except:
+            except Exception:
                 pass
         # If no serializer found, raise error.
         l = len(serializers)
