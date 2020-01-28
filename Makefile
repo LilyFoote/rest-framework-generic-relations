@@ -7,8 +7,9 @@ help:
 	@echo " make release -- pushes to pypi"
 
 test:
-	python manage.py test
+	tox
 
 release:
+	rm -rf dist
 	python setup.py sdist bdist_wheel
 	twine upload dist/*

@@ -2,17 +2,26 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
+from os.path import abspath, dirname, join
 
 
-version = '2.0.0'
+def read_relative_file(filename):
+    """
+    Returns contents of the given file, whose path is supposed relative
+    to this module.
+    """
+    with open(join(dirname(abspath(__file__)), filename), 'r') as f:
+        return f.read()
 
 
 setup(
     name='rest-framework-generic-relations',
-    version=version,
+    version='2.0.0',
     url='https://github.com/Ian-Foote/rest-framework-generic-relations',
     license='BSD',
     description='Generic Relations for Django Rest Framework',
+    long_description=read_relative_file('README.md'),
+    long_description_content_type='text/markdown',
     author='Ian Foote',
     author_email='python@ian.feete.org',
     packages=find_packages(),
