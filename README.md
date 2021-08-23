@@ -1,4 +1,5 @@
-# Rest Framework Generic Relations [![Build Status](https://travis-ci.org/Ian-Foote/rest-framework-generic-relations.svg?branch=pep8)](https://travis-ci.org/Ian-Foote/rest-framework-generic-relations)
+# Rest Framework Generic Relations [![Build Status](https://github.com/Ian-Foote/rest-framework-generic-relations/actions/workflows/tests.yml/badge.svg)](https://github.com/Ian-Foote/rest-framework-generic-relations/actions/workflows/tests.yml)
+
 
 This library implements [Django REST Framework](http://www.django-rest-framework.org/) serializers to handle generic foreign keys.
 
