@@ -41,4 +41,4 @@ Minimum supported dependencies are now:
 
 ## v0.1.0
 
-* Initial release
+* Initial release - Forked from https://github.com/encode/django-rest-framework/pull/755
