@@ -1,0 +1,38 @@
+name: rest-framework-generic-relations tests
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - "3.6"
+          - "3.9"
+        django-version:
+          - "2.2"
+          - "3.1"
+          - "3.2"
+        drf-version:
+          - "3.11"
+          - "3.12"
+
+    name: "py${{ matrix.python-version}} dj${{ matrix.django-version }} drf${{ matrix.drf-version }}"
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies (django ${{ matrix.django-version }})
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest-django django==${{ matrix.django-version }}.* djangorestframework==${{ matrix.drf-version }}.* 
+          pip install -e .
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Test with pytest
+        run: |
+          pytest --ds=testsettings generic_relations/tests/
