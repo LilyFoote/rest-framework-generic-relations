@@ -1,5 +1,13 @@
 # Rest Framework Generic Relations Changelog
 
+## v2.1.0
+
+General dependency update
+
+* Minimum Python version is now 3.6
+* Minimum DRF version is now 3.11
+* Supported Django versions are now [2.2, 3.1, 3.2]
+
 ## v2.0.0
 
 * Add Python 3.8, Django 3.0 and DRF 3.11 support
