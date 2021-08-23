@@ -1,4 +1,4 @@
-name: rest-framework-generic-relations tests
+name: tests
 on: [push]
 jobs:
   build:
