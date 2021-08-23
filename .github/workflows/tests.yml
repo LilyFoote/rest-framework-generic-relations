@@ -26,8 +26,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies (django ${{ matrix.django-version }})
         run: |
-          python -m pip install --upgrade pip flake8
-          pip install django==${{ matrix.django-version }}.* djangorestframework==${{ matrix.drf-version }}.* 
+          python -m pip install --upgrade pip
+          pip install flake8 pytest-django django==${{ matrix.django-version }}.* djangorestframework==${{ matrix.drf-version }}.* 
           pip install -e .
       - name: Lint with flake8
         run: |
@@ -35,4 +35,4 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
       - name: Test with pytest
         run: |
-          ./manage.py test --settings=testsettings typedmodels.tests
+          pytest --ds=testsettings generic_relations/tests/
