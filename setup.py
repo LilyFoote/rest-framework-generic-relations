@@ -16,7 +16,7 @@ def read_relative_file(filename):
 
 setup(
     name="rest-framework-generic-relations",
-    version="2.0.0",
+    version="2.1.0",
     url="https://github.com/Ian-Foote/rest-framework-generic-relations",
     license="BSD",
     description="Generic Relations for Django Rest Framework",
