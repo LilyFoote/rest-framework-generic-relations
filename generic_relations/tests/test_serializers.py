@@ -71,3 +71,12 @@ class TestGenericModelSerializer(TestCase):
             {'text': 'Reticulate the splines'},
             {'url': 'https://www.djangoproject.com/'},
         ])
+
+    def test_is_valid_raise_exception(self):
+        serializer = GenericModelSerializer(
+            serializers={Bookmark: BookmarkSerializer()},
+            data={'url': 'not-a-url'},
+            )
+
+        with self.assertRaises(serializers.ValidationError):
+            serializer.is_valid(raise_exception=True)
