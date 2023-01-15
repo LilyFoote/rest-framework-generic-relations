@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.6"
+          - "3.7"
           - "3.11"
         django-version:
           - "2.2"
@@ -27,6 +27,10 @@ jobs:
             drf-version: "3.14"
           - django-version: "3.1"
             drf-version: "3.14"
+          - django-version: "4.1"
+            drf-version: "3.11"
+          - django-version: "4.1"
+            drf-version: "3.12"
 
     name: "py${{ matrix.python-version}} dj${{ matrix.django-version }} drf${{ matrix.drf-version }}"
 
