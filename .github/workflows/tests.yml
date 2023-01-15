@@ -31,6 +31,8 @@ jobs:
             drf-version: "3.11"
           - django-version: "4.1"
             drf-version: "3.12"
+          - django-version: "4.1"
+            python-version: "3.7"
 
     name: "py${{ matrix.python-version}} dj${{ matrix.django-version }} drf${{ matrix.drf-version }}"
 
